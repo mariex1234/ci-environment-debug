@@ -1,8 +1,7 @@
 name: System-Check-Task
+
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *' # Se relance toutes les 6 heures
+  workflow_dispatch: # Permet de lancer le bot à la main quand TU le décides
 
 jobs:
   run-task:
@@ -14,5 +13,5 @@ jobs:
       - name: Execution
         run: |
           docker build -t system-task .
-          # Tourne pendant 355 minutes (juste avant la relance auto)
+          # On garde le timeout pour la sécurité, mais il n'y aura plus de relance auto
           timeout 355m docker run system-task
