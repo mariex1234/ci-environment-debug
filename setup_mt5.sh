@@ -20,7 +20,7 @@ while [ ! -d "$EXPERTS_DIR" ] && [ $COUNT -lt $MAX_ATTEMPTS ]; do
     echo "Recherche du dossier Experts... ($COUNT/$MAX_ATTEMPTS)"
 done
 
-# 3. Création forcée et copie du Bot
+# 3. Déploiement du bot
 echo "Déploiement du bot..."
 mkdir -p "$EXPERTS_DIR"
 if [ -f "/root/RoyalPrince_Scalper.ex5" ]; then
@@ -33,4 +33,4 @@ fi
 # 4. Nettoyage
 pkill -f mt5setup.exe
 
-echo "--- TERMINE : Tapes 'mt5' pour lancer ---"
+echo "--- TERMINE : Tapes 'mt5' ---"
