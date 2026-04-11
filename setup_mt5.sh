@@ -1,26 +1,48 @@
 #!/bin/bash
 
-# Chemins MT5
-MT5_DIR="$HOME/.wine/drive_c/Program Files/MetaTrader 5"
-MQL5_DIR="$MT5_DIR/MQL5/Experts"
-PRESETS_DIR="$MT5_DIR/MQL5/Profiles/Presets"
+# Chemins
+MT5_INSTALLER="/root/mt5setup.exe"
+MT5_PATH="$HOME/.wine/drive_c/Program Files/MetaTrader 5"
+PRESETS_DIR="$MT5_PATH/MQL5/Profiles/Presets"
+EXPERTS_DIR="$MT5_PATH/MQL5/Experts"
 
-echo "--- INSTALLATION MT5 & RANGEMENT DES CONFIGS ---"
+echo "--- LANCEMENT DE L'INSTALLATION AUTOMATIQUE ---"
 
-# 1. Lancer l'installateur
-wine /root/mt5setup.exe /auto
-sleep 15
+# 1. Lancer l'installateur en arrière-plan
+wine "$MT5_INSTALLER" /auto &
 
-# 2. Création des dossiers (MT5 ne crée pas toujours Presets par défaut)
-mkdir -p "$MQL5_DIR"
-mkdir -p "$PRESETS_DIR"
+echo "En attente de la création des dossiers par Wine..."
 
-# 3. Copie des fichiers
-echo "Installation du bot RoyalPrince..."
-cp /root/RoyalPrince_Scalper.ex5 "$MQL5_DIR/"
+# 2. BOUCLE DE VERIFICATION (Le script attend que MT5 crée le dossier racine)
+MAX_ATTEMPTS=30
+COUNT=0
+while [ ! -d "$MT5_PATH" ] && [ $COUNT -lt $MAX_ATTEMPTS ]; do
+    sleep 2
+    COUNT=$((COUNT + 1))
+    echo "Attente... ($COUNT/$MAX_ATTEMPTS)"
+done
 
-echo "Mise en place des configurations dans le dossier Presets..."
-cp /root/*.set "$PRESETS_DIR/"
+if [ -d "$MT5_PATH" ]; then
+    echo "✔ Dossier MetaTrader 5 détecté !"
+    
+    # Force la création des sous-dossiers au cas où
+    mkdir -p "$PRESETS_DIR"
+    mkdir -p "$EXPERTS_DIR"
 
-echo "--- TERMINE ---"
-echo "Dans MT5 : Expert Advisors -> Propriétés -> Charger -> Tu verras tes fichiers .set ici."
+    # 3. Copie des fichiers avec vérification
+    echo "Déploiement des fichiers..."
+    cp /root/RoyalPrince_Scalper.ex5 "$EXPERTS_DIR/"
+    cp /root/*.set "$PRESETS_DIR/"
+    
+    echo "------------------------------------------"
+    echo "✔ BOT : RoyalPrince_Scalper -> Installé"
+    echo "✔ CONFIGS : ULTIME OR & BTC KAMIKAZ -> Dans Presets"
+    echo "------------------------------------------"
+else
+    echo "✘ Erreur : MT5 n'a pas été installé à temps. Réessaie."
+    exit 1
+fi
+
+# 4. Tuer le processus de l'installateur s'il tourne encore
+pkill -f mt5setup.exe
+echo "Installation terminée. Tu peux lancer MT5."
