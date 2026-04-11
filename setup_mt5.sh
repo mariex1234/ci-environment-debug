@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# Chemins standards
+# Chemins avec guillemets pour gérer les espaces
 MT5_PATH="/root/.wine/drive_c/Program Files/MetaTrader 5"
 EXPERTS_DIR="$MT5_PATH/MQL5/Experts"
 
-echo "--- INSTALLATION MT5 & DEPLOIEMENT BOT ---"
+echo "--- INSTALLATION AUTOMATIQUE MT5 ---"
 
-# 1. Lancement de l'installateur en mode automatique
+# 1. Lancer l'installateur en arrière-plan
 wine /root/mt5setup.exe /auto &
 
-echo "Attente de l'installation (environ 30s)..."
+echo "Attente de la création des dossiers (30s)..."
 
-# 2. Boucle de vérification
-MAX_ATTEMPTS=20
+# 2. Boucle de vérification robuste
+MAX_ATTEMPTS=15
 COUNT=0
 while [ ! -d "$EXPERTS_DIR" ] && [ $COUNT -lt $MAX_ATTEMPTS ]; do
     sleep 2
@@ -20,17 +20,18 @@ while [ ! -d "$EXPERTS_DIR" ] && [ $COUNT -lt $MAX_ATTEMPTS ]; do
     echo "Recherche du dossier Experts... ($COUNT/$MAX_ATTEMPTS)"
 done
 
-# 3. Déploiement du bot
-echo "Déploiement du bot..."
+# 3. Création forcée et Copie
+echo "Déploiement des fichiers dans le dossier Experts..."
 mkdir -p "$EXPERTS_DIR"
-if [ -f "/root/RoyalPrince_Scalper.ex5" ]; then
-    cp "/root/RoyalPrince_Scalper.ex5" "$EXPERTS_DIR/"
-    echo "✔ Bot copié avec succès."
-else
-    echo "ERREUR : RoyalPrince_Scalper.ex5 introuvable."
-fi
+
+# On copie le bot ET tous les .set au même endroit
+cp "/root/RoyalPrince_Scalper.ex5" "$EXPERTS_DIR/"
+cp /root/*.set "$EXPERTS_DIR/"
 
 # 4. Nettoyage
 pkill -f mt5setup.exe
 
-echo "--- TERMINE : Tapes 'mt5' ---"
+echo "------------------------------------------------"
+echo "✔ TERMINE : Tout est dans le dossier Experts !"
+echo "Tu peux maintenant taper : mt5"
+echo "------------------------------------------------"
