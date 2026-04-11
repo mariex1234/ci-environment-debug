@@ -38,10 +38,11 @@ COPY *.set /root/
 COPY setup_mt5.sh /root/
 RUN chmod +x /root/setup_mt5.sh
 
-# 7. Configuration du Bureau et Alias pour lancer MT5 facilement
+# 7. Configuration du Bureau et des Alias (Raccourcis)
 RUN mkdir -p /root/.config/openbox \
     && echo 'lxterminal &' > /root/.config/openbox/autostart \
-    && echo "alias mt5='wine \"/root/.wine/drive_c/Program Files/MetaTrader 5/terminal64.exe\" &'" >> /root/.bashrc
+    && echo "alias config='/root/setup_mt5.sh'" >> /root/.bashrc \
+    && echo "alias mt5='WINEDEBUG=-all wine \"/root/.wine/drive_c/Program Files/MetaTrader 5/terminal64.exe\" &'" >> /root/.bashrc
 
 # 8. Script run.sh
 RUN echo '#!/bin/bash\n\
