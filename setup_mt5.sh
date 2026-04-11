@@ -1,49 +1,37 @@
 #!/bin/bash
 
-# Configuration des chemins
-MT5_ROOT="/root/.wine/drive_c/Program Files/MetaTrader 5"
-EXPERTS_DIR="$MT5_ROOT/MQL5/Experts"
-CONFIG_NAME="config.ini"
+# --- FORCE L'INITIALISATION DE WINE ---
+echo "Initialisation de Wine..."
+winecfg /v win10 & # Lance une config rapide en arrière-plan
+sleep 5
+pkill winecfg
 
-echo "--- CONFIGURATION AUTOMATIQUE EXNESS & MT5 ---"
-
-# 1. Création du fichier de config directement dans le dossier MT5
-# On utilise 'config.ini' (plus standard pour MT5)
-echo "[Common]
-Login=81616089
-Password=01191981IRENE@a
-Server=Exness-MT5Trial10
-ProxyEnable=0
-CertConfirm=1" > "$MT5_ROOT/$CONFIG_NAME"
-
-# 2. Force l'enregistrement du serveur (pour éviter la fenêtre "Select Company")
-mkdir -p "$MT5_ROOT/bases"
-echo "Exness-MT5Trial10" > "$MT5_ROOT/bases/servers.dat"
-
-# 3. Lancement de l'installateur en mode auto
+# --- LANCEMENT DE L'INSTALLATION ---
+echo "Lancement de l'installateur Exness..."
+# On utilise le chemin complet pour l'installateur
 wine /root/mt5setup.exe /auto &
 
-echo "Attente de l'installation et des dossiers (30s)..."
+echo "Attente de l'installation (environ 60s)..."
 
-# 4. Boucle de vérification du dossier Experts
-MAX_ATTEMPTS=15
+# --- BOUCLE DE VÉRIFICATION RÉELLE ---
+# Au lieu de vérifier le dossier Experts, on vérifie l'EXE
+MAX_ATTEMPTS=30
 COUNT=0
-while [ ! -d "$EXPERTS_DIR" ] && [ $COUNT -lt $MAX_ATTEMPTS ]; do
-    sleep 2
+EXE_PATH="/root/.wine/drive_c/Program Files/MetaTrader 5/terminal64.exe"
+
+while [ ! -f "$EXE_PATH" ] && [ $COUNT -lt $MAX_ATTEMPTS ]; do
+    sleep 3
     COUNT=$((COUNT + 1))
-    echo "Recherche du dossier Experts... ($COUNT/$MAX_ATTEMPTS)"
+    echo "Attente de terminal64.exe... ($COUNT/$MAX_ATTEMPTS)"
 done
 
-# 5. Déploiement du Bot et des fichiers .set
-echo "Déploiement des fichiers MQL5..."
-mkdir -p "$EXPERTS_DIR"
-cp "/root/RoyalPrince_Scalper.ex5" "$EXPERTS_DIR/"
-cp /root/*.set "$EXPERTS_DIR/"
-
-# 6. Nettoyage de l'installateur
-pkill -f mt5setup.exe
-
-echo "------------------------------------------------"
-echo "✔ CONFIGURATION TERMINEE"
-echo "Identifiants injectés : 81616089 (Trial10)"
-echo "------------------------------------------------"
+if [ -f "$EXE_PATH" ]; then
+    echo "✔ MT5 installé avec succès !"
+    # On place le config.ini ICI maintenant que le dossier existe
+    echo "[Common]
+Login=81616089
+Password=01191981IRENE@a
+Server=Exness-MT5Trial10" > "/root/.wine/drive_c/Program Files/MetaTrader 5/config.ini"
+else
+    echo "❌ Erreur : L'installation a échoué. Vérifie les logs Wine."
+fi
