@@ -2,14 +2,15 @@
 
 MT5_PATH="$HOME/.wine/drive_c/Program Files/MetaTrader 5"
 EXPERTS_DIR="$MT5_PATH/MQL5/Experts"
+PRESETS_DIR="$MT5_PATH/MQL5/Profiles/Presets"
 
-echo "--- INSTALLATION MT5 EN COURS ---"
+echo "--- INSTALLATION MT5 & RANGEMENT ---"
 
 # 1. Lancer l'installateur
 wine /root/mt5setup.exe /auto &
 
-# 2. Attendre que le dossier Experts soit créé
-echo "Attente de la création des dossiers MT5..."
+# 2. Attendre que MT5 crée les dossiers
+echo "Recherche du dossier Experts..."
 MAX_ATTEMPTS=30
 COUNT=0
 while [ ! -d "$EXPERTS_DIR" ] && [ $COUNT -lt $MAX_ATTEMPTS ]; do
@@ -18,16 +19,22 @@ while [ ! -d "$EXPERTS_DIR" ] && [ $COUNT -lt $MAX_ATTEMPTS ]; do
 done
 
 if [ -d "$EXPERTS_DIR" ]; then
-    echo "✔ Dossier Experts détecté."
+    echo "✔ Dossier trouvé. Nettoyage et installation..."
     
-    # 3. Copie de tout au même endroit (Bot + Configs)
+    # Force la création du dossier Presets
+    mkdir -p "$PRESETS_DIR"
+
+    # 3. On range chaque fichier à sa place
+    # On met UNIQUEMENT le bot dans Experts (pour qu'il soit visible)
     cp /root/RoyalPrince_Scalper.ex5 "$EXPERTS_DIR/"
-    cp /root/*.set "$EXPERTS_DIR/"
     
-    echo "--- CONFIGURATION TERMINEE ---"
-    echo "Le bot et les fichiers .set sont dans MQL5/Experts"
+    # On met les configs UNIQUEMENT dans Presets
+    cp /root/*.set "$PRESETS_DIR/"
+    
+    echo "✔ Bot installé dans EXPERTS"
+    echo "✔ Configs installées dans PRESETS"
 else
-    echo "✘ Erreur : Dossiers non détectés après 60s."
+    echo "✘ Erreur : Dossier Experts non trouvé."
 fi
 
 pkill -f mt5setup.exe
