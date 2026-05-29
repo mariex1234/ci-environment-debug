@@ -28,14 +28,14 @@ COPY setup_mt5.sh /root/
 COPY watchdog.sh /root/
 RUN chmod +x /root/setup_mt5.sh /root/watchdog.sh
 
-# 4. Configuration finale
+# 4. VOS ALIAS (Réintégrés exactement comme vous les aviez)
 RUN mkdir -p /root/.config/openbox \
     && echo 'lxterminal &' > /root/.config/openbox/autostart \
+    && echo "alias config='/root/setup_mt5.sh'" >> /root/.bashrc \
     && echo "alias mt5='WINEDEBUG=-all wine \"/root/.wine/drive_c/Program Files/MetaTrader 5/terminal64.exe\" &'" >> /root/.bashrc
 
 # 5. Script de démarrage (run.sh)
 RUN echo '#!/bin/bash\n\
-wget -q https://download.mql5.com/cdn/web/metaquotes.software.corp/mt5/mt5setup.exe -O /root/mt5setup.exe\n\
 Xvfb :1 -screen 0 1280x800x16 &\n\
 sleep 2\n\
 DISPLAY=:1 openbox-session &\n\
