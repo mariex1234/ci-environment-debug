@@ -1,9 +1,13 @@
 #!/bin/bash
-# Script de surveillance automatique
+# /root/watchdog.sh
+
 while true; do
-    if ! pgrep -f "metatrader.exe" > /dev/null; then
-        echo "Relance de MetaTrader..."
-        DISPLAY=:1 wine /chemin/vers/votre/metatrader.exe &
+    # Vérifie si le processus terminal64.exe tourne
+    if ! pgrep -f "terminal64.exe" > /dev/null; then
+        echo "$(date) : MetaTrader 5 est arrêté, redémarrage..."
+        # On relance MetaTrader
+        DISPLAY=:1 wine "/root/.wine/drive_c/Program Files/MetaTrader 5/terminal64.exe" &
     fi
-    sleep 30
+    # Vérifie toutes les 60 secondes pour ne pas surcharger le CPU
+    sleep 60
 done
